@@ -1,6 +1,10 @@
 import { getClient } from "@/lib/client";
 import { gql } from "@apollo/client";
-import styles from "@/app/page.module.css"
+import styles from "@/app/page.module.css";
+import Verified from "@/svgs/verified.svg";
+import Exclamation from "@/svgs/exclamation.svg";
+import Disabled from "@/svgs/desabled.svg";
+import Circle from "@/svgs/circle.svg";
 
 async function loadData() {
   const { data } = await getClient().query({
@@ -55,7 +59,7 @@ async function HomePage() {
       case "UNVERIFIED":
         return styles.unverified;
       default:
-        return styles.default; // Puedes definir un estilo predeterminado si es necesario
+        return styles.default;
     }
   };
 
@@ -74,8 +78,8 @@ async function HomePage() {
 
 
   const formatStatus = (status) => {
-    if (!status) return ''; 
-  
+    if (!status) return '';
+
     const lowerCaseStatus = status.toLowerCase();
     return lowerCaseStatus.charAt(0).toUpperCase() + lowerCaseStatus.slice(1);
   };
@@ -88,16 +92,16 @@ async function HomePage() {
     const year = date.getFullYear();
     const month = monthNames[date.getMonth()];
     const day = date.getDate();
-  
+
     return `${year} ${month} ${day}`;
   };
 
   const formatDateTime = (dateTimeString) => {
     if (!dateTimeString) return ''; // Manejar el caso en que dateTimeString sea null o undefined
-  
-    const dateTime = new Date(dateTimeString); 
+
+    const dateTime = new Date(dateTimeString);
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  
+
     const year = dateTime.getFullYear();
     const month = monthNames[dateTime.getMonth()];
     const day = dateTime.getDate();
@@ -109,9 +113,9 @@ async function HomePage() {
 
     return `${year} ${month} ${day} ${hour}:${minutes} ${amPM}`;
   };
-  
 
-  
+
+
   return (
     <div className={styles.main}>
       <div className={styles.title}>
@@ -153,7 +157,7 @@ async function HomePage() {
 
               <td className={styles.td}>
                 <button className={`${styles.btn} ${getVerificationStatusStyle(member.verificationStatus)}`}>
-                  <p className={styles.roundButton}>{formatStatus(member.verificationStatus)}</p>
+                  <p className={styles.roundButton} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', justifyContent: "space-evenly" }}><Circle/>{formatStatus(member.verificationStatus)}</p>
                 </button>
               </td>
 
@@ -164,8 +168,13 @@ async function HomePage() {
               <td className={styles.td}><p className={styles.textDefault}>{formatDate(member.dateTimeCreated)}</p></td>
 
               <td className={styles.td}>
-                <button className={`${styles.btn} ${getStatusStyle(member.status)}`}>
-                  <p className={styles.roundButton}>{formatStatus(member.status)}</p>
+                <button className={`${styles.btnStatus} ${getStatusStyle(member.status)}`}>
+                  <p className={styles.roundButton} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', justifyContent: "space-evenly" }}>
+                    {member.status === 'ACTIVE' && <Verified />}
+                    {member.status === 'BLACKLISTER' && <Exclamation />}
+                    {member.status === 'DESABLED' && <Disabled />}
+                    {formatStatus(member.status)}
+                  </p>
                 </button>
               </td>
 

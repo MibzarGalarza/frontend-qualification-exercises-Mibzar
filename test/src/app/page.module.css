@@ -68,6 +68,17 @@
   cursor: pointer;
   border-radius: 20px;
 }
+
+.btnStatus {
+  width: 80px;
+  background-color: #0C1820 ;
+  border: 3px solid;
+  color: black;
+  padding: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 20px;
+}
 .verified {
   border-color: #007F05;
   color: #027948;
