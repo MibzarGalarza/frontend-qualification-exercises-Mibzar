@@ -11,31 +11,53 @@ import Arrow from "@/svgs/downarrow.svg";
 
 function Table({ members }) {
 
-    const defaultMember = members;
     const [filters, setFilters] = useState(members)
-
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpenStatus, setIsOpenStatus] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState("Status");
+    const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("Verification Status");
     const dropdownRef = useRef(null);
 
     console.log(selectedStatus)
+    console.log(selectedVerificationStatus)
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
 
-    const handleSelectStatus = (status) => {
-        setSelectedStatus(status);
-        if (status === "Status") {
-            setFilters(members);
-            setIsOpen(false)
-        } else {
-            const filteredMembers = members.filter(member => member.status === status);
-            setFilters(filteredMembers);
-            setIsOpen(false)
-        }
+    const toggleDropdownStatus = () => {
+        setIsOpenStatus(!isOpenStatus);
     };
 
+    const handleSelectStatus = (status) => {
+        setSelectedStatus(status);
+        setIsOpen(false);
+    };
+
+    const handleSelectStatusVerification = (status) => {
+        setSelectedVerificationStatus(status);
+        setIsOpenStatus(false);
+    };
+
+
+    useEffect(() => {
+        // Función para manejar el filtro de miembros
+        const handleFilterMembers = () => {
+          const isStatusSelected = selectedStatus !== "Status";
+          const isVerificationStatusSelected = selectedVerificationStatus !== "Verification Status";
+      
+          if (!isStatusSelected && !isVerificationStatusSelected) {
+            setFilters(members);
+          } else {
+            const filteredMembers = members.filter(member => {
+              return (!isStatusSelected || member.status === selectedStatus) && (!isVerificationStatusSelected || member.verificationStatus === selectedVerificationStatus);
+            });
+            setFilters(filteredMembers);
+          }
+        };
+      
+        handleFilterMembers();
+      }, [selectedStatus, selectedVerificationStatus]);
 
     const getVerificationStatusStyle = (verificationStatus) => {
         switch (verificationStatus) {
@@ -118,12 +140,32 @@ function Table({ members }) {
                                     <Arrow />
                                 </button></div>
                         </th>
+
                         <th className={styles.th}>
-                            <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
-                                <span style={{ marginRight: '5px' }}>Verification Status</span>
-                                <Arrow />
-                            </button>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
+                                <button onClick={toggleDropdownStatus} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '5px' }}>{selectedVerificationStatus}</span>
+                                    <Arrow />
+                                </button>
+                                {isOpenStatus && (
+                                    <div className={styles.dropdownMenu}>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatusVerification("Verification Status")}>
+                                            All
+                                        </div>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatusVerification("VERIFIED")}>
+                                            Verified
+                                        </div>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatusVerification("UNVERIFIED")}>
+                                            <p>Unverified</p>
+                                        </div>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatusVerification("PENDING")}>
+                                            Pending
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </th>
+
                         <th className={styles.th}>
                             <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
                                 <span style={{ marginRight: '5px' }}>Email Address</span>
@@ -157,13 +199,16 @@ function Table({ members }) {
                                 </button>
                                 {isOpen && (
                                     <div className={styles.dropdownMenu}>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatus("Status")}>
+                                            All
+                                        </div>
                                         <div className={styles.dropdownItem} onClick={() => handleSelectStatus("ACTIVE")}>
                                             Active
                                         </div>
-                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatus("Blacklisted")}>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatus("BLACKLISTED")}>
                                             <p>Blacklisted</p>
                                         </div>
-                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatus("Disabled")}>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectStatus("DISABLED")}>
                                             Disabled
                                         </div>
                                     </div>
