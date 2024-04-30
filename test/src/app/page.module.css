@@ -45,6 +45,7 @@
 
 .th,
 .td {
+  width: 200px;
   padding: 10px;
   text-align: left;
   border-bottom: 1px solid #2E2E2E;
@@ -78,6 +79,16 @@
   font-size: 13px;
   cursor: pointer;
   border-radius: 20px;
+}
+
+.btnFilters{
+  background-color: #0A1117 ;
+  border: 2px solid;
+  color: #7A7A7A;
+  padding: 7px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 7px;
 }
 .verified {
   border-color: #007F05;

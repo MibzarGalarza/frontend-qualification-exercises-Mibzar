@@ -5,6 +5,7 @@ import Verified from "@/svgs/verified.svg";
 import Exclamation from "@/svgs/exclamation.svg";
 import Disabled from "@/svgs/desabled.svg";
 import Circle from "@/svgs/circle.svg";
+import Arrow from "@/svgs/downarrow.svg";
 
 async function loadData() {
   const { data } = await getClient().query({
@@ -126,14 +127,55 @@ async function HomePage() {
 
         <thead className={styles.filterMain}>
           <tr>
-            <th className={styles.th}><div style={{ display: "flex" }}><h3 style={{ marginRight: "1rem", color: "white" }}>Filters |</h3><button>Show members</button></div></th>
-            <th className={styles.th}> <button>Show List</button></th>
-            <th className={styles.th}> <button>Show List</button></th>
-            <th className={styles.th}> <button>Show List</button></th>
-            <th className={styles.th}> <button>Show List</button></th>
-            <th className={styles.th}> <button>Show List</button></th>
-            <th className={styles.th}> <button>Show List</button></th>
-            <th className={styles.th}> <button>Show List</button></th>
+            <th className={styles.th}>
+              <div style={{ display: "flex" }}><h3 style={{ marginRight: "1rem", color: "white" }}>Filters |</h3>
+                <button style={{ display: "flex", alignItems: 'center', justifyContent: 'center', justifyContent: "space-between" }} className={styles.btnFilters}>
+                  <span style={{ marginRight: '5px' }}>Name</span>
+                  <Arrow />
+                </button></div>
+            </th>
+            <th className={styles.th}>
+              <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
+                <span style={{ marginRight: '5px' }}>Verification Status</span>
+                <Arrow />
+              </button>
+            </th>
+            <th className={styles.th}>
+              <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
+                <span style={{ marginRight: '5px' }}>Email Address</span>
+                <Arrow />
+              </button>
+            </th>
+            <th className={styles.th}>
+              <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
+                <span style={{ marginRight: '5px' }}>Mobile Number</span>
+                <Arrow />
+              </button>
+            </th>
+            <th className={styles.th}>
+              <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
+                <span style={{ marginRight: '5px' }}>Domain</span>
+                <Arrow />
+              </button>
+            </th>
+            <th className={styles.th}>
+              <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
+                <span style={{ marginRight: '5px' }}>Date Time Created</span>
+                <Arrow />
+              </button>
+            </th>
+            <th className={styles.th}>
+              <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
+                <span style={{ marginRight: '5px' }}>Status</span>
+                <Arrow />
+              </button>
+            </th>
+            <th className={styles.th}>
+              <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
+                <span style={{ marginRight: '5px' }}>Date and time Last Active</span>
+                <Arrow />
+              </button>
+            </th>
           </tr>
         </thead>
 
@@ -157,7 +199,7 @@ async function HomePage() {
 
               <td className={styles.td}>
                 <button className={`${styles.btn} ${getVerificationStatusStyle(member.verificationStatus)}`}>
-                  <p className={styles.roundButton} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', justifyContent: "space-evenly" }}><Circle/>{formatStatus(member.verificationStatus)}</p>
+                  <p className={styles.roundButton} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', justifyContent: "space-evenly" }}><Circle />{formatStatus(member.verificationStatus)}</p>
                 </button>
               </td>
 
