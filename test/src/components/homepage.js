@@ -10,16 +10,17 @@ import Arrow from "@/svgs/downarrow.svg";
 
 
 function Table({ members }) {
-
     const [filters, setFilters] = useState(members)
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpenEmail, setIsOpenEmail] = useState(false);
     const [isOpenStatus, setIsOpenStatus] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState("Status");
+    const [emailList, setEmailList] = useState([]);
     const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("Verification Status");
     const dropdownRef = useRef(null);
 
-    console.log(selectedStatus)
-    console.log(selectedVerificationStatus)
+
+    console.log(members)
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -28,6 +29,11 @@ function Table({ members }) {
     const toggleDropdownStatus = () => {
         setIsOpenStatus(!isOpenStatus);
     };
+
+    const toggleDropdownEmail = () => {
+        setIsOpenEmail(!isOpenEmail);
+    };
+
 
     const handleSelectStatus = (status) => {
         setSelectedStatus(status);
@@ -39,25 +45,46 @@ function Table({ members }) {
         setIsOpenStatus(false);
     };
 
+    const emailAddresses = members.map(member => member.emailAddress).filter(email => email);
 
     useEffect(() => {
         // Función para manejar el filtro de miembros
         const handleFilterMembers = () => {
-          const isStatusSelected = selectedStatus !== "Status";
-          const isVerificationStatusSelected = selectedVerificationStatus !== "Verification Status";
-      
-          if (!isStatusSelected && !isVerificationStatusSelected) {
-            setFilters(members);
-          } else {
+            const isStatusSelected = selectedStatus !== "Status";
+            const isVerificationStatusSelected = selectedVerificationStatus !== "Verification Status";
+
+            // Obtener una lista de correos electrónicos seleccionados
+            const selectedEmails = emailList;
+
+            // Verificar si no se ha seleccionado ningún correo electrónico
+            const noEmailSelected = selectedEmails.length === 0;
+
+            // Filtrar los miembros basándose en el estado seleccionado, el estado de verificación seleccionado y los correos electrónicos seleccionados
             const filteredMembers = members.filter(member => {
-              return (!isStatusSelected || member.status === selectedStatus) && (!isVerificationStatusSelected || member.verificationStatus === selectedVerificationStatus);
+                // Verificar si el miembro cumple con los criterios de estado seleccionado
+                const statusCriteria = !isStatusSelected || member.status === selectedStatus;
+
+                // Verificar si el miembro cumple con los criterios de estado de verificación seleccionado
+                const verificationStatusCriteria = !isVerificationStatusSelected || member.verificationStatus === selectedVerificationStatus;
+
+                // Si no hay ningún correo electrónico seleccionado, mostrar todos los miembros
+                if (noEmailSelected) {
+                    return statusCriteria && verificationStatusCriteria;
+                }
+
+                // Verificar si el correo electrónico del miembro está en la lista de correos electrónicos seleccionados
+                const emailCriteria = selectedEmails.includes(member.emailAddress);
+
+                // Devolver verdadero si el miembro cumple con todos los criterios
+                return statusCriteria && verificationStatusCriteria && emailCriteria;
             });
+
+            // Actualizar el estado de los filtros con los miembros filtrados
             setFilters(filteredMembers);
-          }
         };
-      
+
         handleFilterMembers();
-      }, [selectedStatus, selectedVerificationStatus]);
+    }, [selectedStatus, selectedVerificationStatus, emailList, members]);
 
     const getVerificationStatusStyle = (verificationStatus) => {
         switch (verificationStatus) {
@@ -123,6 +150,20 @@ function Table({ members }) {
         return `${year} ${month} ${day} ${hour}:${minutes} ${amPM}`;
     };
 
+    const handleEmailClick = (email) => {
+        const emailIndex = emailList.indexOf(email);
+
+        if (emailIndex !== -1) {
+            setEmailList(prevList => prevList.filter(item => item !== email));
+        } else {
+            setEmailList(prevList => [...prevList, email]);
+        }
+    };
+
+    const handleDropdownBlur = () => {
+        setIsOpenEmail(false);
+    };
+
     return (
         <div className={styles.main}>
             <div className={styles.title}>
@@ -167,11 +208,29 @@ function Table({ members }) {
                         </th>
 
                         <th className={styles.th}>
-                            <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
-                                <span style={{ marginRight: '5px' }}>Email Address</span>
-                                <Arrow />
-                            </button>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
+                                <button onClick={toggleDropdownEmail} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '5px' }}>Email Address</span>
+                                    <Arrow />
+                                </button>
+                                {isOpenEmail && (
+                                    <div className={styles.dropdownMenu}>
+                                        {emailAddresses.map((email, index) => (
+                                            <div key={index} className={styles.dropdownItemEmail} onClick={() => handleEmailClick(email)}>
+                                                <input
+                                                    style={{ marginRight: "1rem" }}
+                                                    type="checkbox"
+                                                    checked={emailList.includes(email)}
+                                                    readOnly
+                                                />
+                                                <p>{email}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </th>
+
                         <th className={styles.th}>
                             <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
                                 <span style={{ marginRight: '5px' }}>Mobile Number</span>
