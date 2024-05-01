@@ -14,24 +14,24 @@ import NextIcon from "@/svgs/next.svg"
 function Table({ members }) {
     const [primeros, setPrimeros] = useState([]);
     const [selectedNumPagination, setSelectedNumPagination] = useState(10);
-    
+
 
     const [indiceInicio, setIndiceInicio] = useState(0);
 
     const handleNextClick = () => {
         const nuevoIndiceInicio = indiceInicio + selectedNumPagination;
         setIndiceInicio(nuevoIndiceInicio);
-    
+
         const siguientesUsuarios = members.slice(nuevoIndiceInicio, nuevoIndiceInicio + selectedNumPagination);
         setPrimeros(siguientesUsuarios);
-    
+
         setSelectedNumPagination(selectedNumPagination);
     };
-    
+
     const handleBackClick = () => {
         const nuevoIndiceInicio = Math.max(indiceInicio - selectedNumPagination, 0);
         setIndiceInicio(nuevoIndiceInicio);
-    
+
         const usuariosAnteriores = members.slice(nuevoIndiceInicio, nuevoIndiceInicio + selectedNumPagination);
         setPrimeros(usuariosAnteriores);
         setSelectedNumPagination(selectedNumPagination);
@@ -47,6 +47,8 @@ function Table({ members }) {
     const [isOpen, setIsOpen] = useState(false);
     const [isOpenNumber, setIsOpenNumber] = useState(false);
     const [isOpenPagination, setIsOpenPagination] = useState(false);
+    const [isOpenCreated, setIsOpenCreated] = useState(false);
+    const [isOpenLast, setIsOpenLast] = useState(false);
     const [isOpenName, setIsOpenName] = useState(false);
     const [isOpenDomain, setIsOpenDomain] = useState(false);
     const [isOpenEmail, setIsOpenEmail] = useState(false);
@@ -56,11 +58,15 @@ function Table({ members }) {
     const [numberList, setNumberList] = useState([]);
     const [domainList, setDomainList] = useState([]);
     const [nameList, setNameList] = useState([]);
+    const [dateList, setDateList] = useState([]);
+    const [lastList, setLastList] = useState([]);
     const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("Verification Status");
     const [searchTerm, setSearchTerm] = useState('');
     const [searchTermNumber, setSearchTermNumber] = useState('');
     const [searchTermDomain, setSearchTermDomain] = useState('');
     const [searchTermName, setSearchTermName] = useState('');
+    const [searchTermDate, setSearchTermDate] = useState('');
+    const [searchTermLast, setSearchTermLast] = useState('');
     const dropdownRef = useRef(null);
 
     const toggleDropdown = () => {
@@ -91,6 +97,13 @@ function Table({ members }) {
         setIsOpenPagination(!isOpenPagination);
     };
 
+    const toggleDropdownCreated = () => {
+        setIsOpenCreated(!isOpenCreated);
+    };
+
+    const toggleDropdownLast = () => {
+        setIsOpenLast(!isOpenLast);
+    };
 
     const handleSelectStatus = (status) => {
         setSelectedStatus(status);
@@ -112,6 +125,8 @@ function Table({ members }) {
     const numberMembers = primeros.map(member => member.mobileNumber).filter(number => number);
     const domainMembers = primeros.map(member => member.domain).filter(domain => domain);
     const nameMembers = primeros.map(member => member.name).filter(name => name);
+    const dateMembers = primeros.map(member => member.dateTimeCreated).filter(date => date);
+    const dateTimeLastActive = primeros.map(member => member.dateTimeLastActive).filter(last => last);
 
     useEffect(() => {
         // Función para manejar el filtro de miembros
@@ -123,18 +138,22 @@ function Table({ members }) {
             const selectedNumbers = numberList;
             const selectedDomains = domainList;
             const selectedNames = nameList;
+            const selectedDates = dateList;
+            const selectedLast = lastList;
 
             const noEmailSelected = selectedEmails.length === 0;
             const noNumberSelected = selectedNumbers.length === 0;
             const noDomainSelected = selectedDomains.length === 0;
             const noNamesSelected = selectedNames.length === 0;
+            const noDatessSelected = selectedDates.length === 0;
+            const noLastSelected = selectedLast.length === 0;
 
             const filteredMembers = primeros.filter(member => {
 
                 const statusCriteria = !isStatusSelected || member.status === selectedStatus;
                 const verificationStatusCriteria = !isVerificationStatusSelected || member.verificationStatus === selectedVerificationStatus;
 
-                if (noEmailSelected && noNumberSelected && noDomainSelected && noNamesSelected) {
+                if (noEmailSelected && noNumberSelected && noDomainSelected && noNamesSelected && noDatessSelected && noLastSelected) {
                     return statusCriteria && verificationStatusCriteria;
                 }
 
@@ -142,14 +161,16 @@ function Table({ members }) {
                 const numberCriteria = noNumberSelected ? true : selectedNumbers.includes(member.mobileNumber);
                 const domainCriteria = noDomainSelected ? true : selectedDomains.includes(member.domain);
                 const nameCriteria = noNamesSelected ? true : selectedNames.includes(member.name);
+                const dateCriteria = noDatessSelected ? true : selectedDates.includes(member.dateTimeCreated);
+                const lastCriteria = noLastSelected ? true : selectedLast.includes(member.dateTimeLastActive);
 
-                return statusCriteria && verificationStatusCriteria && emailCriteria && numberCriteria && domainCriteria && nameCriteria;
+                return statusCriteria && verificationStatusCriteria && emailCriteria && numberCriteria && domainCriteria && nameCriteria && dateCriteria && lastCriteria;
             });
             setFilters(filteredMembers);
         };
 
         handleFilterMembers();
-    }, [selectedStatus, selectedVerificationStatus, emailList, numberList, primeros, domainList, nameList]);
+    }, [selectedStatus, selectedVerificationStatus, emailList, numberList, primeros, domainList, nameList, dateList, lastList]);
 
     const getVerificationStatusStyle = (verificationStatus) => {
         switch (verificationStatus) {
@@ -256,6 +277,27 @@ function Table({ members }) {
         }
     };
 
+    
+    const handleDateClick = (date) => {
+        const dateIndex = dateList.indexOf(date);
+
+        if (dateIndex !== -1) {
+            setDateList(prevList => prevList.filter(item => item !== date));
+        } else {
+            setDateList(prevList => [...prevList, date]);
+        }
+    };
+
+    const handleLastClick = (last) => {
+        const lastIndex = lastList.indexOf(last);
+
+        if (lastIndex !== -1) {
+            setLastList(prevList => prevList.filter(item => item !== last));
+        } else {
+            setLastList(prevList => [...prevList, last]);
+        }
+    };
+
 
     const filteredEmailAddresses = emailAddresses.filter(email =>
         email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -271,6 +313,14 @@ function Table({ members }) {
 
     const filteredName = nameMembers.filter(name =>
         name.toLowerCase().includes(searchTermName.toLowerCase())
+    );
+
+    const filteredDate = dateMembers.filter(date =>
+        date.toLowerCase().includes(searchTermDate.toLowerCase())
+    );
+
+    const filteredLast = dateTimeLastActive.filter(last =>
+        last.toLowerCase().includes(searchTermLast.toLowerCase())
     );
 
     return (
@@ -451,10 +501,37 @@ function Table({ members }) {
                         </th>
 
                         <th className={styles.th}>
-                            <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
-                                <span style={{ marginRight: '5px' }}>Date Time Created</span>
-                                <Arrow />
-                            </button>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
+                                <button onClick={toggleDropdownCreated} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '2px' }}>Date Time Created</span>
+                                    <Arrow />
+                                </button>
+                                {isOpenCreated && (
+                                    <div className={styles.dropdownMenu}>
+                                        <div style={{ justifyContent: "center" }}>
+                                            <input
+                                                style={{ fontWeight: "400", borderRadius: "5px", backgroundColor: "#0A1117", margin: "15px", width: "200px", height: "30px", fontSize: "13px", alignContent: "center", justifyContent: "center", justifyItems: "center" }}
+                                                type="text"
+                                                placeholder="Search Email Adress"
+                                                value={searchTermDate}
+                                                onChange={(e) => setSearchTermDate(e.target.value)}
+                                                className={styles.searchInput}
+                                            />
+                                        </div>
+                                        {filteredDate.map((date, index) => (
+                                            <div key={index} className={styles.dropdownItemEmail} onClick={() => handleDateClick(date)}>
+                                                <input
+                                                    style={{ marginRight: "1rem" }}
+                                                    type="checkbox"
+                                                    checked={dateList.includes(date)}
+                                                    readOnly
+                                                />
+                                                <p>{formatDate(date)}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </th>
 
                         <th className={styles.th}>
@@ -483,10 +560,37 @@ function Table({ members }) {
                         </th>
 
                         <th className={styles.th}>
-                            <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
-                                <span style={{ marginRight: '5px' }}>Date and time Last Active</span>
-                                <Arrow />
-                            </button>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
+                                <button onClick={toggleDropdownLast} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '2px' }}>Date and time Last Active</span>
+                                    <Arrow />
+                                </button>
+                                {isOpenLast && (
+                                    <div className={styles.dropdownMenu}>
+                                        <div style={{ justifyContent: "center" }}>
+                                            <input
+                                                style={{ fontWeight: "400", borderRadius: "5px", backgroundColor: "#0A1117", margin: "15px", width: "200px", height: "30px", fontSize: "13px", alignContent: "center", justifyContent: "center", justifyItems: "center" }}
+                                                type="text"
+                                                placeholder="Search Email Adress"
+                                                value={searchTermLast}
+                                                onChange={(e) => setSearchTermLast(e.target.value)}
+                                                className={styles.searchInput}
+                                            />
+                                        </div>
+                                        {filteredLast.map((last, index) => (
+                                            <div key={index} className={styles.dropdownItemEmail} onClick={() => handleLastClick(last)}>
+                                                <input
+                                                    style={{ marginRight: "1rem" }}
+                                                    type="checkbox"
+                                                    checked={lastList.includes(last)}
+                                                    readOnly
+                                                />
+                                                <p>{formatDateTime(last)}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </th>
                     </tr>
                 </thead>
@@ -541,21 +645,21 @@ function Table({ members }) {
 
 
                         <th className={styles.th}>
-                            <button onClick={handleBackClick} style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between', color:"#FFFFFF" }} className={styles.btnFilters}>
-                                <BackIcon/>
-                                <span style={{ marginRight: '5px', color:"#FFFFFF" }}>Back</span>
+                            <button onClick={handleBackClick} style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between', color: "#FFFFFF" }} className={styles.btnFilters}>
+                                <BackIcon />
+                                <span style={{ marginRight: '5px', color: "#FFFFFF" }}>Back</span>
                             </button>
                         </th>
                         <th className={styles.th}>
-                            <button onClick={handleNextClick} style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between', color:"#FFFFFF" }} className={styles.btnFilters}>
-                                <span style={{ marginRight: '5px', color:"#FFFFFF" }}>Next</span>
+                            <button onClick={handleNextClick} style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between', color: "#FFFFFF" }} className={styles.btnFilters}>
+                                <span style={{ marginRight: '5px', color: "#FFFFFF" }}>Next</span>
                                 <NextIcon />
                             </button>
                         </th>
                         <th className={styles.th}>
                             <div className={styles.dropdownContainer} ref={dropdownRef}>
-                                <button style={{ color:"#FFFFFF"}} onClick={toggleDropdownPagination} className={styles.btnFilters}>
-                                    <span style={{ marginRight: '5px', color:"#FFFFFF" }}>{selectedNumPagination} Entries</span>
+                                <button style={{ color: "#FFFFFF" }} onClick={toggleDropdownPagination} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '5px', color: "#FFFFFF" }}>{selectedNumPagination} Entries</span>
                                     <Arrow />
                                 </button>
                                 {isOpenPagination && (
