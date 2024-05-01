@@ -30,7 +30,7 @@ async function loadData() {
         }
       `,
         variables: {
-            first: 10,
+            first: 100,
             after: null,
             filter: null
         }

@@ -6,13 +6,47 @@ import Exclamation from "@/svgs/exclamation.svg";
 import Disabled from "@/svgs/desabled.svg";
 import Circle from "@/svgs/circle.svg";
 import Arrow from "@/svgs/downarrow.svg";
+import BackIcon from "@/svgs/back.svg"
+import NextIcon from "@/svgs/next.svg"
 
 
 
 function Table({ members }) {
-    const [filters, setFilters] = useState(members)
+    const [primeros, setPrimeros] = useState([]);
+    const [selectedNumPagination, setSelectedNumPagination] = useState(10);
+    
+
+    const [indiceInicio, setIndiceInicio] = useState(0);
+
+    const handleNextClick = () => {
+        const nuevoIndiceInicio = indiceInicio + selectedNumPagination;
+        setIndiceInicio(nuevoIndiceInicio);
+    
+        const siguientesUsuarios = members.slice(nuevoIndiceInicio, nuevoIndiceInicio + selectedNumPagination);
+        setPrimeros(siguientesUsuarios);
+    
+        setSelectedNumPagination(selectedNumPagination);
+    };
+    
+    const handleBackClick = () => {
+        const nuevoIndiceInicio = Math.max(indiceInicio - selectedNumPagination, 0);
+        setIndiceInicio(nuevoIndiceInicio);
+    
+        const usuariosAnteriores = members.slice(nuevoIndiceInicio, nuevoIndiceInicio + selectedNumPagination);
+        setPrimeros(usuariosAnteriores);
+        setSelectedNumPagination(selectedNumPagination);
+    };
+
+    useEffect(() => {
+        const primerosUsuarios = members.slice(0, selectedNumPagination);
+        setPrimeros(primerosUsuarios);
+    }, [members, selectedNumPagination]);
+
+
+    const [filters, setFilters] = useState(primeros)
     const [isOpen, setIsOpen] = useState(false);
     const [isOpenNumber, setIsOpenNumber] = useState(false);
+    const [isOpenPagination, setIsOpenPagination] = useState(false);
     const [isOpenName, setIsOpenName] = useState(false);
     const [isOpenDomain, setIsOpenDomain] = useState(false);
     const [isOpenEmail, setIsOpenEmail] = useState(false);
@@ -28,8 +62,6 @@ function Table({ members }) {
     const [searchTermDomain, setSearchTermDomain] = useState('');
     const [searchTermName, setSearchTermName] = useState('');
     const dropdownRef = useRef(null);
-
-    console.log(members)
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -55,6 +87,10 @@ function Table({ members }) {
         setIsOpenName(!isOpenName);
     };
 
+    const toggleDropdownPagination = () => {
+        setIsOpenPagination(!isOpenPagination);
+    };
+
 
     const handleSelectStatus = (status) => {
         setSelectedStatus(status);
@@ -66,10 +102,16 @@ function Table({ members }) {
         setIsOpenStatus(false);
     };
 
-    const emailAddresses = members.map(member => member.emailAddress).filter(email => email);
-    const numberMembers = members.map(member => member.mobileNumber).filter(number => number);
-    const domainMembers = members.map(member => member.domain).filter(domain => domain);
-    const nameMembers = members.map(member => member.name).filter(name => name);
+
+    const handleSelectPagination = (num) => {
+        setSelectedNumPagination(num);
+        setIsOpenPagination(false);
+    };
+
+    const emailAddresses = primeros.map(member => member.emailAddress).filter(email => email);
+    const numberMembers = primeros.map(member => member.mobileNumber).filter(number => number);
+    const domainMembers = primeros.map(member => member.domain).filter(domain => domain);
+    const nameMembers = primeros.map(member => member.name).filter(name => name);
 
     useEffect(() => {
         // Función para manejar el filtro de miembros
@@ -87,7 +129,7 @@ function Table({ members }) {
             const noDomainSelected = selectedDomains.length === 0;
             const noNamesSelected = selectedNames.length === 0;
 
-            const filteredMembers = members.filter(member => {
+            const filteredMembers = primeros.filter(member => {
 
                 const statusCriteria = !isStatusSelected || member.status === selectedStatus;
                 const verificationStatusCriteria = !isVerificationStatusSelected || member.verificationStatus === selectedVerificationStatus;
@@ -107,7 +149,7 @@ function Table({ members }) {
         };
 
         handleFilterMembers();
-    }, [selectedStatus, selectedVerificationStatus, emailList, numberList, members, domainList, nameList]);
+    }, [selectedStatus, selectedVerificationStatus, emailList, numberList, primeros, domainList, nameList]);
 
     const getVerificationStatusStyle = (verificationStatus) => {
         switch (verificationStatus) {
@@ -243,11 +285,11 @@ function Table({ members }) {
                     <tr>
                         <th className={styles.th}>
                             <div className={styles.dropdownContainer} ref={dropdownRef}>
-                                <div style={{ display: "inline-flex" }}><p style={{ fontSize:"14px",marginRight: "1rem", color: "white" }}>Filters|</p>
-                                <button onClick={toggleDropdownName} style={{ display: "flex", alignItems: 'center', justifyContent: 'center', justifyContent: "space-between" }} className={styles.btnFilters}>
-                                    <span style={{ marginRight: '2px' }}>Name</span>
-                                    <Arrow />
-                                </button></div>
+                                <div style={{ display: "inline-flex" }}><p style={{ fontSize: "14px", marginRight: "1rem", color: "white" }}>Filters|</p>
+                                    <button onClick={toggleDropdownName} style={{ display: "flex", alignItems: 'center', justifyContent: 'center', justifyContent: "space-between" }} className={styles.btnFilters}>
+                                        <span style={{ marginRight: '2px' }}>Name</span>
+                                        <Arrow />
+                                    </button></div>
 
                                 {isOpenName && (
                                     <div className={styles.dropdownMenu}>
@@ -370,7 +412,7 @@ function Table({ members }) {
                             </div>
                         </th>
 
-             
+
 
 
 
@@ -494,6 +536,48 @@ function Table({ members }) {
                         </tr>
                     ))}
                 </tbody>
+                <thead className={styles.filterMain}>
+                    <tr>
+
+
+                        <th className={styles.th}>
+                            <button onClick={handleBackClick} style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between', color:"#FFFFFF" }} className={styles.btnFilters}>
+                                <BackIcon/>
+                                <span style={{ marginRight: '5px', color:"#FFFFFF" }}>Back</span>
+                            </button>
+                        </th>
+                        <th className={styles.th}>
+                            <button onClick={handleNextClick} style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between', color:"#FFFFFF" }} className={styles.btnFilters}>
+                                <span style={{ marginRight: '5px', color:"#FFFFFF" }}>Next</span>
+                                <NextIcon />
+                            </button>
+                        </th>
+                        <th className={styles.th}>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
+                                <button style={{ color:"#FFFFFF"}} onClick={toggleDropdownPagination} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '5px', color:"#FFFFFF" }}>{selectedNumPagination} Entries</span>
+                                    <Arrow />
+                                </button>
+                                {isOpenPagination && (
+                                    <div className={styles.dropdownMenu}>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectPagination(10)}>
+                                            <p>10</p>
+                                        </div>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectPagination(20)}>
+                                            <p>20</p>
+                                        </div>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectPagination(50)}>
+                                            <p>50</p>
+                                        </div>
+                                        <div className={styles.dropdownItem} onClick={() => handleSelectPagination(100)}>
+                                            <p>100</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
             </table>
         </div>
     );
