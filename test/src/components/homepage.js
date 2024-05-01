@@ -12,13 +12,24 @@ import Arrow from "@/svgs/downarrow.svg";
 function Table({ members }) {
     const [filters, setFilters] = useState(members)
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpenNumber, setIsOpenNumber] = useState(false);
+    const [isOpenName, setIsOpenName] = useState(false);
+    const [isOpenDomain, setIsOpenDomain] = useState(false);
     const [isOpenEmail, setIsOpenEmail] = useState(false);
     const [isOpenStatus, setIsOpenStatus] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState("Status");
     const [emailList, setEmailList] = useState([]);
+    const [numberList, setNumberList] = useState([]);
+    const [domainList, setDomainList] = useState([]);
+    const [nameList, setNameList] = useState([]);
     const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("Verification Status");
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchTermNumber, setSearchTermNumber] = useState('');
+    const [searchTermDomain, setSearchTermDomain] = useState('');
+    const [searchTermName, setSearchTermName] = useState('');
     const dropdownRef = useRef(null);
+
+    console.log(members)
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -30,6 +41,18 @@ function Table({ members }) {
 
     const toggleDropdownEmail = () => {
         setIsOpenEmail(!isOpenEmail);
+    };
+
+    const toggleDropdownNumber = () => {
+        setIsOpenNumber(!isOpenNumber);
+    };
+
+    const toggleDropdownDomain = () => {
+        setIsOpenDomain(!isOpenDomain);
+    };
+
+    const toggleDropdownName = () => {
+        setIsOpenName(!isOpenName);
     };
 
 
@@ -44,6 +67,9 @@ function Table({ members }) {
     };
 
     const emailAddresses = members.map(member => member.emailAddress).filter(email => email);
+    const numberMembers = members.map(member => member.mobileNumber).filter(number => number);
+    const domainMembers = members.map(member => member.domain).filter(domain => domain);
+    const nameMembers = members.map(member => member.name).filter(name => name);
 
     useEffect(() => {
         // Función para manejar el filtro de miembros
@@ -52,31 +78,36 @@ function Table({ members }) {
             const isVerificationStatusSelected = selectedVerificationStatus !== "Verification Status";
 
             const selectedEmails = emailList;
-
+            const selectedNumbers = numberList;
+            const selectedDomains = domainList;
+            const selectedNames = nameList;
 
             const noEmailSelected = selectedEmails.length === 0;
-
+            const noNumberSelected = selectedNumbers.length === 0;
+            const noDomainSelected = selectedDomains.length === 0;
+            const noNamesSelected = selectedNames.length === 0;
 
             const filteredMembers = members.filter(member => {
 
                 const statusCriteria = !isStatusSelected || member.status === selectedStatus;
-
-
                 const verificationStatusCriteria = !isVerificationStatusSelected || member.verificationStatus === selectedVerificationStatus;
 
-                if (noEmailSelected) {
+                if (noEmailSelected && noNumberSelected && noDomainSelected && noNamesSelected) {
                     return statusCriteria && verificationStatusCriteria;
                 }
 
-                const emailCriteria = selectedEmails.includes(member.emailAddress);
+                const emailCriteria = noEmailSelected ? true : selectedEmails.includes(member.emailAddress);
+                const numberCriteria = noNumberSelected ? true : selectedNumbers.includes(member.mobileNumber);
+                const domainCriteria = noDomainSelected ? true : selectedDomains.includes(member.domain);
+                const nameCriteria = noNamesSelected ? true : selectedNames.includes(member.name);
 
-                return statusCriteria && verificationStatusCriteria && emailCriteria;
+                return statusCriteria && verificationStatusCriteria && emailCriteria && numberCriteria && domainCriteria && nameCriteria;
             });
             setFilters(filteredMembers);
         };
 
         handleFilterMembers();
-    }, [selectedStatus, selectedVerificationStatus, emailList, members]);
+    }, [selectedStatus, selectedVerificationStatus, emailList, numberList, members, domainList, nameList]);
 
     const getVerificationStatusStyle = (verificationStatus) => {
         switch (verificationStatus) {
@@ -152,9 +183,52 @@ function Table({ members }) {
         }
     };
 
+    const handleNumberClick = (number) => {
+        const numberIndex = numberList.indexOf(number);
+
+        if (numberIndex !== -1) {
+            setNumberList(prevList => prevList.filter(item => item !== number));
+        } else {
+            setNumberList(prevList => [...prevList, number]);
+        }
+    };
+
+    const handleDomainClick = (domain) => {
+        const domainIndex = domainList.indexOf(domain);
+
+        if (domainIndex !== -1) {
+            setDomainList(prevList => prevList.filter(item => item !== domain));
+        } else {
+            setDomainList(prevList => [...prevList, domain]);
+        }
+    };
+
+
+    const handleNameClick = (name) => {
+        const nameIndex = nameList.indexOf(name);
+
+        if (nameIndex !== -1) {
+            setNameList(prevList => prevList.filter(item => item !== name));
+        } else {
+            setNameList(prevList => [...prevList, name]);
+        }
+    };
+
 
     const filteredEmailAddresses = emailAddresses.filter(email =>
         email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const filteredNumber = numberMembers.filter(number =>
+        number.toLowerCase().includes(searchTermNumber.toLowerCase())
+    );
+
+    const filteredDomain = domainMembers.filter(domain =>
+        domain.toLowerCase().includes(searchTermDomain.toLowerCase())
+    );
+
+    const filteredName = nameMembers.filter(name =>
+        name.toLowerCase().includes(searchTermName.toLowerCase())
     );
 
     return (
@@ -168,11 +242,39 @@ function Table({ members }) {
                 <thead className={styles.filterMain}>
                     <tr>
                         <th className={styles.th}>
-                            <div style={{ display: "flex" }}><h3 style={{ marginRight: "1rem", color: "white" }}>Filters |</h3>
-                                <button style={{ display: "flex", alignItems: 'center', justifyContent: 'center', justifyContent: "space-between" }} className={styles.btnFilters}>
-                                    <span style={{ marginRight: '5px' }}>Name</span>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
+                                <div style={{ display: "inline-flex" }}><p style={{ fontSize:"14px",marginRight: "1rem", color: "white" }}>Filters|</p>
+                                <button onClick={toggleDropdownName} style={{ display: "flex", alignItems: 'center', justifyContent: 'center', justifyContent: "space-between" }} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '2px' }}>Name</span>
                                     <Arrow />
                                 </button></div>
+
+                                {isOpenName && (
+                                    <div className={styles.dropdownMenu}>
+                                        <div style={{ justifyContent: "center" }}>
+                                            <input
+                                                style={{ fontWeight: "400", borderRadius: "5px", backgroundColor: "#0A1117", margin: "15px", width: "200px", height: "30px", fontSize: "13px", alignContent: "center", justifyContent: "center", justifyItems: "center" }}
+                                                type="text"
+                                                placeholder="Search Email Adress"
+                                                value={searchTermName}
+                                                onChange={(e) => setSearchTermName(e.target.value)}
+                                                className={styles.searchInput}
+                                            />
+                                        </div>
+                                        {filteredName.map((name, index) => (
+                                            <div key={index} className={styles.dropdownItemEmail} onClick={() => handleNameClick(name)}>
+                                                <input
+                                                    style={{ marginRight: "1rem" }}
+                                                    type="checkbox"
+                                                    checked={nameList.includes(name)}
+                                                    readOnly
+                                                />
+                                                <p>{name}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </th>
 
                         <th className={styles.th}>
@@ -203,12 +305,12 @@ function Table({ members }) {
                         <th className={styles.th}>
                             <div className={styles.dropdownContainer} ref={dropdownRef}>
                                 <button onClick={toggleDropdownEmail} className={styles.btnFilters}>
-                                    <span style={{ marginRight: '5px' }}>Email Address</span>
+                                    <span style={{ marginRight: '2px' }}>Email Address</span>
                                     <Arrow />
                                 </button>
                                 {isOpenEmail && (
                                     <div className={styles.dropdownMenu}>
-                                        <div style={{justifyContent:"center"}}>
+                                        <div style={{ justifyContent: "center" }}>
                                             <input
                                                 style={{ fontWeight: "400", borderRadius: "5px", backgroundColor: "#0A1117", margin: "15px", width: "200px", height: "30px", fontSize: "13px", alignContent: "center", justifyContent: "center", justifyItems: "center" }}
                                                 type="text"
@@ -235,17 +337,77 @@ function Table({ members }) {
                         </th>
 
                         <th className={styles.th}>
-                            <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
-                                <span style={{ marginRight: '5px' }}>Mobile Number</span>
-                                <Arrow />
-                            </button>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
+                                <button onClick={toggleDropdownNumber} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '2px' }}>Mobile Number</span>
+                                    <Arrow />
+                                </button>
+                                {isOpenNumber && (
+                                    <div className={styles.dropdownMenu}>
+                                        <div style={{ justifyContent: "center" }}>
+                                            <input
+                                                style={{ fontWeight: "400", borderRadius: "5px", backgroundColor: "#0A1117", margin: "15px", width: "200px", height: "30px", fontSize: "13px", alignContent: "center", justifyContent: "center", justifyItems: "center" }}
+                                                type="text"
+                                                placeholder="Search Email Adress"
+                                                value={searchTermNumber}
+                                                onChange={(e) => setSearchTermNumber(e.target.value)}
+                                                className={styles.searchInput}
+                                            />
+                                        </div>
+                                        {filteredNumber.map((number, index) => (
+                                            <div key={index} className={styles.dropdownItemEmail} onClick={() => handleNumberClick(number)}>
+                                                <input
+                                                    style={{ marginRight: "1rem" }}
+                                                    type="checkbox"
+                                                    checked={numberList.includes(number)}
+                                                    readOnly
+                                                />
+                                                <p>{number}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </th>
+
+             
+
+
+
                         <th className={styles.th}>
-                            <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
-                                <span style={{ marginRight: '5px' }}>Domain</span>
-                                <Arrow />
-                            </button>
+                            <div className={styles.dropdownContainer} ref={dropdownRef}>
+                                <button onClick={toggleDropdownDomain} className={styles.btnFilters}>
+                                    <span style={{ marginRight: '2px' }}>Domain</span>
+                                    <Arrow />
+                                </button>
+                                {isOpenDomain && (
+                                    <div className={styles.dropdownMenu}>
+                                        <div style={{ justifyContent: "center" }}>
+                                            <input
+                                                style={{ fontWeight: "400", borderRadius: "5px", backgroundColor: "#0A1117", margin: "15px", width: "200px", height: "30px", fontSize: "13px", alignContent: "center", justifyContent: "center", justifyItems: "center" }}
+                                                type="text"
+                                                placeholder="Search Email Adress"
+                                                value={searchTermDomain}
+                                                onChange={(e) => setSearchTermDomain(e.target.value)}
+                                                className={styles.searchInput}
+                                            />
+                                        </div>
+                                        {filteredDomain.map((domain, index) => (
+                                            <div key={index} className={styles.dropdownItemEmail} onClick={() => handleDomainClick(domain)}>
+                                                <input
+                                                    style={{ marginRight: "1rem" }}
+                                                    type="checkbox"
+                                                    checked={domainList.includes(domain)}
+                                                    readOnly
+                                                />
+                                                <p>{domain}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </th>
+
                         <th className={styles.th}>
                             <button style={{ display: "flex", alignItems: 'center', justifyContent: 'space-between' }} className={styles.btnFilters}>
                                 <span style={{ marginRight: '5px' }}>Date Time Created</span>
