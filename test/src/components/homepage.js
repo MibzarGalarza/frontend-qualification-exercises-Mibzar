@@ -17,10 +17,8 @@ function Table({ members }) {
     const [selectedStatus, setSelectedStatus] = useState("Status");
     const [emailList, setEmailList] = useState([]);
     const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("Verification Status");
+    const [searchTerm, setSearchTerm] = useState('');
     const dropdownRef = useRef(null);
-
-
-    console.log(members)
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -53,33 +51,27 @@ function Table({ members }) {
             const isStatusSelected = selectedStatus !== "Status";
             const isVerificationStatusSelected = selectedVerificationStatus !== "Verification Status";
 
-            // Obtener una lista de correos electrónicos seleccionados
             const selectedEmails = emailList;
 
-            // Verificar si no se ha seleccionado ningún correo electrónico
+
             const noEmailSelected = selectedEmails.length === 0;
 
-            // Filtrar los miembros basándose en el estado seleccionado, el estado de verificación seleccionado y los correos electrónicos seleccionados
+
             const filteredMembers = members.filter(member => {
-                // Verificar si el miembro cumple con los criterios de estado seleccionado
+
                 const statusCriteria = !isStatusSelected || member.status === selectedStatus;
 
-                // Verificar si el miembro cumple con los criterios de estado de verificación seleccionado
+
                 const verificationStatusCriteria = !isVerificationStatusSelected || member.verificationStatus === selectedVerificationStatus;
 
-                // Si no hay ningún correo electrónico seleccionado, mostrar todos los miembros
                 if (noEmailSelected) {
                     return statusCriteria && verificationStatusCriteria;
                 }
 
-                // Verificar si el correo electrónico del miembro está en la lista de correos electrónicos seleccionados
                 const emailCriteria = selectedEmails.includes(member.emailAddress);
 
-                // Devolver verdadero si el miembro cumple con todos los criterios
                 return statusCriteria && verificationStatusCriteria && emailCriteria;
             });
-
-            // Actualizar el estado de los filtros con los miembros filtrados
             setFilters(filteredMembers);
         };
 
@@ -160,9 +152,10 @@ function Table({ members }) {
         }
     };
 
-    const handleDropdownBlur = () => {
-        setIsOpenEmail(false);
-    };
+
+    const filteredEmailAddresses = emailAddresses.filter(email =>
+        email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className={styles.main}>
@@ -215,7 +208,17 @@ function Table({ members }) {
                                 </button>
                                 {isOpenEmail && (
                                     <div className={styles.dropdownMenu}>
-                                        {emailAddresses.map((email, index) => (
+                                        <div style={{justifyContent:"center"}}>
+                                            <input
+                                                style={{ fontWeight: "400", borderRadius: "5px", backgroundColor: "#0A1117", margin: "15px", width: "200px", height: "30px", fontSize: "13px", alignContent: "center", justifyContent: "center", justifyItems: "center" }}
+                                                type="text"
+                                                placeholder="Search Email Adress"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                className={styles.searchInput}
+                                            />
+                                        </div>
+                                        {filteredEmailAddresses.map((email, index) => (
                                             <div key={index} className={styles.dropdownItemEmail} onClick={() => handleEmailClick(email)}>
                                                 <input
                                                     style={{ marginRight: "1rem" }}
